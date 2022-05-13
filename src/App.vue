@@ -42,6 +42,8 @@ import gpx from "./gpx-parser-builder";
       <button @click="selectSerial">Connect to Serial</button>
       <button @click="disconnect">Reset</button>
       <button @click="writeNmea">Write to GPS</button>
+      <hr />
+      <p>Avancement {{ lineNumber }} / {{ nmeaToWrite.length }} waypoints</p>
     </div>
     <div v-if="!hasSerial">
       You must have Google Chrome or Edge to use this website as Web Serial API
@@ -55,7 +57,7 @@ export default {
   data() {
     return {
       serialDisplay: false,
-      file: "",
+      file: null,
       gpxParsed: null,
       hasSerial: false,
       connected: false,
@@ -123,8 +125,9 @@ export default {
       this.lineNumber = 0;
       this.nmeaToWrite.forEach((el, i) => {
         setTimeout(() => {
+          this.lineNumber = i;
           this.writeToSerial(el);
-        }, i * 500);
+        }, i * 300);
       });
     },
     writeToSerial(text) {
@@ -137,7 +140,7 @@ export default {
       let textToSend = text;
       const result = text + "\r\n";
       writer.write(result);
-      console.log("Text written : ", text);
+      // console.log("Text written : ", text);
       writer.releaseLock();
     },
     async readLoop() {
@@ -152,15 +155,18 @@ export default {
     },
     readFile(e) {
       this.file = this.$refs.file.files[0];
-      if (this.file.name.includes(".gpx")) {
-        this.serialDisplay = true;
+      if (this.file) {
+        if (this.file.name.includes(".gpx")) {
+          this.serialDisplay = true;
+        }
+        let reader = new FileReader();
+
+        reader.readAsText(this.file);
+        reader.onload = (e) => {
+          this.gpxParsed = this.parseGPX(e.target.result);
+          this.fromGPXtoText();
+        };
       }
-      let reader = new FileReader();
-      reader.readAsText(this.file);
-      reader.onload = (e) => {
-        this.gpxParsed = this.parseGPX(e.target.result);
-        this.fromGPXtoText();
-      };
     },
     parseGPX(e) {
       let text = e;

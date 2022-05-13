@@ -27,7 +27,7 @@
 <br />
 <div align="center">
 
-<h3 align="center">GP39 / OpenCPN Waypoint converter 4000</h3>
+<h3 align="center">gp32 / OpenCPN Waypoint converter 4000</h3>
 
 </div>
 
@@ -35,7 +35,7 @@
 
 ## Getting Started
 
-This application was created in order to convert GPX files created via OpenCPN easier for GP39 owners.
+This application was created in order to convert GPX files created via OpenCPN easier for gp32 owners.
 It features :
 
 - Easy upload of GPX
@@ -65,9 +65,9 @@ It features :
 ## Roadmap
 
 - [x] Converts all wpts to a good file
-- [ ] Converts all symbols from OpenCPN and make sure almost all of them has a color and symbol in GP39
+- [ ] Converts all symbols from OpenCPN and make sure almost all of them has a color and symbol in gp32
 
-See the [open issues](https://github.com/PepinNucleaire/gpx-gp39/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/PepinNucleaire/gpx-gp32/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -102,7 +102,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Your Name - [@juju_on_mini](https://twitter.com/juju_on_mini) - muller.julien.02@gmail.com
 
-Project Link: [https://github.com/PepinNucleaire/gpx-gp39](https://github.com/PepinNucleaire/gpx-gp39)
+Project Link: [https://github.com/PepinNucleaire/gpx-gp32](https://github.com/PepinNucleaire/gpx-gp32)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
