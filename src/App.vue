@@ -7,7 +7,7 @@ import gpx from "./gpx-parser-builder";
     <h1>
       OpenCPN GPX to GP32 gpx converter
       <a
-        href="https://github.com/PepinNucleaire/gpx-gp39"
+        href="https://github.com/PepinNucleaire/gpx-gp32"
         aria-label="Repo source"
         class="footer-octicon"
         title="GitHub"
