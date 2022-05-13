@@ -39,33 +39,24 @@ This application was created in order to convert GPX files created via OpenCPN e
 It features :
 
 - Easy upload of GPX
-- Checks for validity of waypoints
--
+- Serial transfer via usb & web serial API
 
 <!-- USAGE EXAMPLES -->
 
 ## Usage
 
-1. Upload your custom creatyed GPX file
-2. It downloads your file with a good name
-3. Put the dowloaded file on your USB key formatted in Fat32
-4. Import it via I/O menu
-
-## Troubleshooting
-
-- The first click on upload is buggy, the second one should work
-- Make sure that the downloaded gpx file is a gpx file inside
+1. Upload your custom created GPX file
+2. Import it via I/O menu via Web Serial USB
 
 ### Requirements
 
-- Names have a 8 character length maximum
+- Names have a 6 character length maximum
 
 <!-- ROADMAP -->
 
 ## Roadmap
 
 - [x] Converts all wpts to a good file
-- [ ] Converts all symbols from OpenCPN and make sure almost all of them has a color and symbol in gp32
 
 See the [open issues](https://github.com/PepinNucleaire/gpx-gp32/issues) for a full list of proposed features (and known issues).
 

@@ -43,7 +43,9 @@ import gpx from "./gpx-parser-builder";
       <button v-if="connected" @click="disconnect">Reset</button><br />
       <button v-if="connected" @click="writeNmea">Write to GPS</button>
       <hr />
-      <p>Avancement {{ lineNumber }} / {{ nmeaToWrite.length }} waypoints</p>
+      <p>
+        Avancement {{ lineNumber }} / {{ nmeaToWrite.length - 1 }} waypoints
+      </p>
     </div>
     <div v-if="!hasSerial">
       You must have Google Chrome or Edge to use this website as Web Serial API
