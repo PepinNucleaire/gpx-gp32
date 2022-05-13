@@ -39,9 +39,9 @@ import gpx from "./gpx-parser-builder";
     <div v-if="hasSerial && serialDisplay">
       <button v-if="connected" style="background-color: green"></button>
       <button v-if="!connected" style="background-color: red"></button>
-      <button @click="selectSerial">Connect to Serial</button>
-      <button @click="disconnect">Reset</button>
-      <button @click="writeNmea">Write to GPS</button>
+      <button @click="selectSerial">Connect to the GPS</button>
+      <button v-if="connected" @click="disconnect">Reset</button><br />
+      <button v-if="connected" @click="writeNmea">Write to GPS</button>
       <hr />
       <p>Avancement {{ lineNumber }} / {{ nmeaToWrite.length }} waypoints</p>
     </div>
@@ -49,6 +49,14 @@ import gpx from "./gpx-parser-builder";
       You must have Google Chrome or Edge to use this website as Web Serial API
       is only supported on these browsers
     </div>
+    <hr />
+    <h2>Notice</h2>
+    <ul>
+      <li>Select your gpx file exported from OpenCPN</li>
+      <li>Connect the GPS via the Serial USB</li>
+      <li>On the GPS, Go to I/O menu, Select "Load data GPS PC"</li>
+      <li>Click on "Write to GPS" and wait for the finish bip</li>
+    </ul>
   </main>
 </template>
 
