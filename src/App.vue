@@ -33,7 +33,7 @@ import gpx from "./gpx-parser-builder";
     <p>
       It will automatically transform and export to gp32 using serial connection
     </p>
-    <input type="file" ref="file" @change="readFile(e)" />
+    <input type="file" ref="filegpx" @change="readFile(e)" />
     <!-- <button @click="submitFile">Upload!</button> -->
     <hr />
     <div v-if="hasSerial && serialDisplay">
@@ -57,7 +57,7 @@ export default {
   data() {
     return {
       serialDisplay: false,
-      file: null,
+      filegpx: null,
       gpxParsed: null,
       hasSerial: false,
       connected: false,
@@ -154,14 +154,14 @@ export default {
       }
     },
     readFile(e) {
-      this.file = this.$refs.file.files[0];
-      if (this.file) {
-        if (this.file.name.includes(".gpx")) {
+      this.filegpx = this.$refs.file.files[0];
+      if (this.filegpx) {
+        if (this.filegpx.name.includes(".gpx")) {
           this.serialDisplay = true;
         }
         let reader = new FileReader();
 
-        reader.readAsText(this.file);
+        reader.readAsText(this.filegpx);
         reader.onload = (e) => {
           this.gpxParsed = this.parseGPX(e.target.result);
           this.fromGPXtoText();
