@@ -136,6 +136,7 @@ export default {
       this.nmeaToWrite.forEach((el, i) => {
         setTimeout(() => {
           this.lineNumber = i;
+          console.log(el);
           this.writeToSerial(el);
         }, i * 300);
       });
