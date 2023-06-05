@@ -22,10 +22,12 @@ import gpx from "./gpx-parser-builder";
     </p>
     <input type="file" id="gpxFile" @change="readFile" />
     <!-- <button @click="submitFile">Upload!</button> -->
-    <hr />
+    <hr v-if="errors.display" />
     <p class="notice" v-if="errors.display">ERROR<br />{{ errors.msg }}</p>
 
-    <div v-if="hasSerial && serialDisplay">
+    <hr v-if="hasSerial && serialDisplay && !errors.display" />
+    <p class="notice" v-if="!errors.display">ERROR<br />"Your GPX looks good, good job !"</p>
+    <div v-if="hasSerial && serialDisplay && !errors.display">
       <button v-if="connected" style="background-color: green"></button>
       <button v-if="!connected" style="background-color: red"></button>
       <button @click="selectSerial">Connect to the GPS</button>
@@ -181,7 +183,8 @@ export default {
     },
     readFile(e) {
       this.filegpx = e.target.files[0];
-      console.log(e.target.files[0]);
+      this.errors.display = false
+      this.errors.msg = ""
       if (this.filegpx) {
         if (this.filegpx.name.includes(".gpx")) {
           this.serialDisplay = true;
@@ -231,11 +234,23 @@ export default {
       return newwpts;
     },
     checkErrors(listParsedWaypoints) {
-      if (!this.checkErrors) { this.errors.display = false };
       const moreThan6Letters = this.checkNamesWithMoreThan6Letters(listParsedWaypoints);
       const sameName = this.checkWptWithSameName(listParsedWaypoints)
       const tooManyWaypoints = this.checkNumbersOfWaypoints(listParsedWaypoints)
-      console.log(moreThan6Letters)
+
+      if (!moreThan6Letters && !sameName && !tooManyWaypoints) {
+        if (this.checkErrors) { console.info("**** NO ERROR DETECTED ****") }
+
+        this.errors.display = false
+        return
+      }
+      if (this.checkErrors) {
+        console.info("**** ERRORS DETECTED ****")
+
+        console.log(moreThan6Letters)
+        console.log(sameName)
+        console.log(tooManyWaypoints)
+      }
       this.errors.msg = `${moreThan6Letters.error} : ${moreThan6Letters.wpts.toString()}\n`
       this.errors.msg = `${sameName.error} : ${sameName.wpts.toString()}\n`
       this.errors.msg = `${tooManyWaypoints.error}`
@@ -253,11 +268,8 @@ export default {
       var arr = listParsedWaypoints.map(x => x.name)
 
       const map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-      console.log([...map.entries()])
       const errors = [...map.entries()].filter(x => { return x[1] > 1 })
       if (errors.length > 0) {
-        console.info("****** WPTS WITH SAME NAME ******")
-        console.info(errors)
         this.errors.display = true
         return {
           error: this.MSG.SAME_NAME, wpts: errors.map(x => x[0])
@@ -267,8 +279,6 @@ export default {
     checkNamesWithMoreThan6Letters(listParsedWaypoints) {
       const listWithErrors = listParsedWaypoints.filter(wpt => wpt.name.length > 6)
       if (listWithErrors.length == 0) { return }
-      console.log("**** WPTS WITH NAME TOO LONG ****");
-      console.log(listWithErrors)
       this.errors.display = true
       return {
         error: this.MSG.NAME_LONG,
