@@ -6,25 +6,12 @@ import gpx from "./gpx-parser-builder";
   <main>
     <h1>
       OpenCPN GPX to GP32 gpx converter
-      <a
-        href="https://github.com/PepinNucleaire/gpx-gp32"
-        aria-label="Repo source"
-        class="footer-octicon"
-        title="GitHub"
-      >
-        <svg
-          aria-hidden="true"
-          class="octicon octicon-mark-github"
-          height="24"
-          version="1.1"
-          viewBox="0 0 16 16"
-          width="24"
-        >
-          <path
-            fill="white"
-            fill-rule="evenodd"
-            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-          ></path>
+      <a href="https://github.com/PepinNucleaire/gpx-gp32" aria-label="Repo source" class="footer-octicon" title="GitHub">
+        <svg aria-hidden="true" class="octicon octicon-mark-github" height="24" version="1.1" viewBox="0 0 16 16"
+          width="24">
+          <path fill="white" fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z">
+          </path>
         </svg>
       </a>
     </h1>
@@ -36,6 +23,8 @@ import gpx from "./gpx-parser-builder";
     <input type="file" id="gpxFile" @change="readFile" />
     <!-- <button @click="submitFile">Upload!</button> -->
     <hr />
+    <p class="notice" v-if="errors.display">ERROR<br />{{ errors.msg }}</p>
+
     <div v-if="hasSerial && serialDisplay">
       <button v-if="connected" style="background-color: green"></button>
       <button v-if="!connected" style="background-color: red"></button>
@@ -59,6 +48,14 @@ import gpx from "./gpx-parser-builder";
       <li>On the GPS, Go to I/O menu, Select "Load data GPS PC"</li>
       <li>Click on "Write to GPS" and wait for the finish bip</li>
     </ul>
+    <h2>Debug</h2>
+    <input type="checkbox" v-model="debug.checkNMEA" />
+    <label for="checkbox">NMEA in console</label>
+    <br />
+    <input type="checkbox" v-model="debug.checkErrors" />
+    <label for="checkbox">Errors in console</label>
+    <br />
+
   </main>
 </template>
 
@@ -66,6 +63,22 @@ import gpx from "./gpx-parser-builder";
 export default {
   data() {
     return {
+      MSG: {
+        SAME_NAME: "More than 2 waypoints with same name",
+        TOO_MANY: "Too many waypoints (Max 1000)",
+        NAME_LONG: "1 or more waypoints has more than 6 characters"
+      },
+      debug: {
+        checkNMEA: false,
+        checkErrors: true,
+      },
+      errors: {
+        display: false,
+        msg: "",
+        tooManyWpts: false,
+        wptsWithSameName: [],
+        wptsWithNameTooLong: []
+      },
       serialDisplay: false,
       filegpx: null,
       gpxParsed: null,
@@ -136,7 +149,9 @@ export default {
       this.nmeaToWrite.forEach((el, i) => {
         setTimeout(() => {
           this.lineNumber = i;
-          console.log(el);
+          if (this.debug.checkNMEA) {
+            console.log(el);
+          }
           this.writeToSerial(el);
         }, i * 300);
       });
@@ -184,6 +199,7 @@ export default {
       let text = e;
       const gpxParsed = gpx.parse(text);
       let newwpts = [];
+      this.checkErrors(gpxParsed.wpt)
       gpxParsed.wpt.map((wpt) => {
         const lon = wpt["$"].lon;
         const lat = wpt["$"].lat;
@@ -193,14 +209,14 @@ export default {
           furunoLon:
             Math.round(
               1000 *
-                (Math.floor(Math.abs(lon)) * 100 +
-                  (Math.abs(lon) - Math.floor(Math.abs(lon))) * 60)
+              (Math.floor(Math.abs(lon)) * 100 +
+                (Math.abs(lon) - Math.floor(Math.abs(lon))) * 60)
             ) / 1000,
           furunoLat:
             Math.round(
               1000 *
-                (Math.floor(Math.abs(lat)) * 100 +
-                  (Math.abs(lat) - Math.floor(Math.abs(lat))) * 60)
+              (Math.floor(Math.abs(lat)) * 100 +
+                (Math.abs(lat) - Math.floor(Math.abs(lat))) * 60)
             ) / 1000,
           ns: wpt["$"].lon > 0 ? "S" : "N",
           ew: wpt["$"].lat > 0 ? "W" : "E",
@@ -208,21 +224,69 @@ export default {
         };
         newwpts.push(newwpt);
       });
-      console.log("**** GPX PARSED ****");
-      console.log(newwpts);
+      if (this.debug.checkNMEA) {
+        console.log("**** GPX PARSED ****");
+        console.log(newwpts);
+      }
       return newwpts;
+    },
+    checkErrors(listParsedWaypoints) {
+      if (!this.checkErrors) { this.errors.display = false };
+      const moreThan6Letters = this.checkNamesWithMoreThan6Letters(listParsedWaypoints);
+      const sameName = this.checkWptWithSameName(listParsedWaypoints)
+      const tooManyWaypoints = this.checkNumbersOfWaypoints(listParsedWaypoints)
+      console.log(moreThan6Letters)
+      this.errors.msg = `${moreThan6Letters.error} : ${moreThan6Letters.wpts.toString()}\n`
+      this.errors.msg = `${sameName.error} : ${sameName.wpts.toString()}\n`
+      this.errors.msg = `${tooManyWaypoints.error}`
+    },
+    checkNumbersOfWaypoints(listParsedWaypoints) {
+      if (listParsedWaypoints.length > 1000) {
+
+        this.errors.display = true
+        this.errors.tooManyWpts = true
+
+        return { error: this.MSG.TOO_MANY }
+      }
+    },
+    checkWptWithSameName(listParsedWaypoints) {
+      var arr = listParsedWaypoints.map(x => x.name)
+
+      const map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+      console.log([...map.entries()])
+      const errors = [...map.entries()].filter(x => { return x[1] > 1 })
+      if (errors.length > 0) {
+        console.info("****** WPTS WITH SAME NAME ******")
+        console.info(errors)
+        this.errors.display = true
+        return {
+          error: this.MSG.SAME_NAME, wpts: errors.map(x => x[0])
+        }
+      }
+    },
+    checkNamesWithMoreThan6Letters(listParsedWaypoints) {
+      const listWithErrors = listParsedWaypoints.filter(wpt => wpt.name.length > 6)
+      if (listWithErrors.length == 0) { return }
+      console.log("**** WPTS WITH NAME TOO LONG ****");
+      console.log(listWithErrors)
+      this.errors.display = true
+      return {
+        error: this.MSG.NAME_LONG,
+        wpts: listWithErrors.map(x => x.name)
+      }
     },
     fromGPXtoText() {
       const listNmea = [];
       this.gpxParsed.map((wpt) =>
         listNmea.push(
-          `$PFEC,GPwpl,${wpt.furunoLat},${wpt.ns},${wpt.furunoLon},${wpt.ew},${wpt.name},0,,V,,,,`
+          `$PFEC, GPwpl, ${wpt.furunoLat},${wpt.ns},${wpt.furunoLon},${wpt.ew},${wpt.name}, 0,, V,,,, `
         )
       );
       listNmea.push("$PFEC,GPxfr,CTL,E");
-
-      console.log("****** NMEA TO WRITE ******");
-      console.log(listNmea);
+      if (this.debug.checkNMEA) {
+        console.info("****** NMEA TO WRITE ******");
+        console.info(listNmea);
+      }
       this.nmeaToWrite = listNmea;
     },
   },
