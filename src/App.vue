@@ -26,7 +26,7 @@ import gpx from "./gpx-parser-builder";
     <p class="notice" v-if="errors.display">ERROR<br />{{ errors.msg }}</p>
 
     <hr v-if="hasSerial && serialDisplay && !errors.display" />
-    <p class="notice" v-if="!errors.display">ERROR<br />Your GPX looks good, good job !</p>
+    <p class="notice" v-if="!errors.display">Your GPX looks good, good job !</p>
     <div v-if="hasSerial && serialDisplay && !errors.display">
       <button v-if="connected" style="background-color: green"></button>
       <button v-if="!connected" style="background-color: red"></button>
