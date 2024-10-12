@@ -88,7 +88,7 @@ export default {
       connected: false,
       port: null,
       reader: null,
-      baudRate: 4800,
+      baudRate: 38400,
       connectFailed: false,
       inputField: null,
       inputStream: null,
